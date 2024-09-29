@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Species Map</title>
+
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    />
+
+    <!-- Styling for the map container -->
+    <style>
+      #map {
+        height: 600px;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Map of Species</h2>
+    <div id="map"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <!-- PapaParse for CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+    <!-- Your JavaScript Code -->
+    <script>
+      // Define the bounds for your grid (Southwest and Northeast corners)
+      var bounds = [
+        [5.0, -120.0], // Southwest corner
+        [30.0, -60.0], // Northeast corner
+      ];
+
+      // Initialize the map with center coordinates, zoom level, and zoom limits
+      var speciesMap = L.map("map", {
+        center: [19.5, -88.5], // Center the map
+        zoom: 6, // Initial zoom level
+        minZoom: 6, // Minimum zoom level
+        maxBounds: bounds, // Restrict the map to the bounds
+        maxBoundsViscosity: 1.0, // Make the map 'bounce' at the edge
+      });
+
+      // Add Esri World Imagery as the tile layer
+      L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        {
+          attribution:
+            "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+        }
+      ).addTo(speciesMap);
+
+      // Load CSV file (data.csv)
+      Papa.parse("data.csv", {
+        download: true,
+        header: true, // Use the first row as header
+        complete: function (results) {
+          var data = results.data; // Array of parsed data
+
+          data.forEach(function (row) {
+            var lat = parseFloat(row["latitude"]);
+            var lon = parseFloat(row["longitud"]);
+            var species = [];
+
+            // Loop through all the columns that contain species
+            Object.keys(row).forEach(function (key) {
+              if (key !== "latitude" && key !== "longitud" && row[key] == 1) {
+                species.push(key); // If species is present (value is 1), add it to the list
+              }
+            });
+
+            var popupText = species.length
+              ? "Especies: " + species.join(", ")
+              : "No hay especies para esta coordenada";
+
+            // Create a circle marker with a popup
+            L.circleMarker([lat, lon], {
+              radius: 5,
+              color: "blue",
+              fillColor: "blue",
+              fillOpacity: 0.6,
+            })
+              .bindPopup(popupText)
+              .addTo(speciesMap);
+          });
+        },
+      });
+
+      // Define the grid step sizes
+      var latStep = 0.5; // Adjust the grid density
+      var lonStep = 0.5;
+
+      // Draw horizontal lines (latitudes)
+      for (var lat = 5.0; lat <= 30.0; lat += latStep) {
+        L.polyline(
+          [
+            [lat, -120.0],
+            [lat, -60.0],
+          ],
+          { color: "gray", weight: 1 }
+        ).addTo(speciesMap);
+      }
+
+      // Draw vertical lines (longitudes)
+      for (var lon = -120.0; lon <= -60.0; lon += lonStep) {
+        L.polyline(
+          [
+            [5.0, lon],
+            [30.0, lon],
+          ],
+          { color: "gray", weight: 1 }
+        ).addTo(speciesMap);
+      }
+    </script>
+  </body>
+</html>
