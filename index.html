@@ -31,27 +31,29 @@
 
     <!-- Your JavaScript Code -->
     <script>
-      // Define the bounds for your grid (Southwest and Northeast corners)
+      // Adjusted bounds to cover a larger area of Mexico and the sea
       var bounds = [
-        [5.0, -120.0], // Southwest corner
-        [30.0, -60.0], // Northeast corner
+        [16.0, -94.0], // Southwest corner (expanded)
+        [24.0, -84.0], // Northeast corner (expanded)
       ];
 
-      // Initialize the map with center coordinates, zoom level, and zoom limits
+      // Initialize the map with updated center and zoom level
       var speciesMap = L.map("map", {
-        center: [19.5, -88.5], // Center the map
-        zoom: 6, // Initial zoom level
-        minZoom: 6, // Minimum zoom level
-        maxBounds: bounds, // Restrict the map to the bounds
+        center: [20.0, -89.0], // Center the map on the Yucatán Peninsula
+        zoom: 8, // Slightly wider zoom level
+        minZoom: 8, // Adjust minimum zoom
+        maxBounds: bounds, // Restrict the map to the expanded bounds
         maxBoundsViscosity: 1.0, // Make the map 'bounce' at the edge
       });
 
-      // Add Esri World Imagery as the tile layer
-      L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      // Use CartoDB Positron No Labels as the tile layer
+      var CartoDB_PositronNoLabels = L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
         {
           attribution:
-            "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+          subdomains: "abcd",
+          maxZoom: 20,
         }
       ).addTo(speciesMap);
 
@@ -91,27 +93,27 @@
         },
       });
 
-      // Define the grid step sizes
-      var latStep = 0.5; // Adjust the grid density
-      var lonStep = 0.5;
+      // Define smaller grid step sizes for Yucatán
+      var latStep = 0.2; // Smaller grid step for latitude
+      var lonStep = 0.2; // Smaller grid step for longitude
 
-      // Draw horizontal lines (latitudes)
-      for (var lat = 5.0; lat <= 30.0; lat += latStep) {
+      // Draw horizontal lines (latitudes) - extended region
+      for (var lat = 16.0; lat <= 24.0; lat += latStep) {
         L.polyline(
           [
-            [lat, -120.0],
-            [lat, -60.0],
+            [lat, -94.0],
+            [lat, -84.0],
           ],
           { color: "gray", weight: 1 }
         ).addTo(speciesMap);
       }
 
-      // Draw vertical lines (longitudes)
-      for (var lon = -120.0; lon <= -60.0; lon += lonStep) {
+      // Draw vertical lines (longitudes) - extended region
+      for (var lon = -94.0; lon <= -84.0; lon += lonStep) {
         L.polyline(
           [
-            [5.0, lon],
-            [30.0, lon],
+            [16.0, lon],
+            [24.0, lon],
           ],
           { color: "gray", weight: 1 }
         ).addTo(speciesMap);
